@@ -41,7 +41,28 @@ return {
       settings = {
         Lua = {
           format = { enable = false },
+          diagnostics = { globals = { "vim" } },
         },
+      },
+    })
+
+    -- json
+    lspconfig.jsonls.setup({
+      capabilities = capabilities,
+      settings = {
+        json = {
+          validate = { enable = true },
+        },
+      },
+    })
+
+    -- css
+    lspconfig.cssls.setup({
+      capabilities = capabilities,
+      settings = {
+        css = { validate = true },
+        scss = { validate = true },
+        less = { validate = true },
       },
     })
 
@@ -49,6 +70,11 @@ return {
     require("conform").setup({
       formatters_by_ft = {
         lua = { "stylua" },
+        json = { "prettier" },
+        jsonc = { "prettier" },
+        css = { "prettier" },
+        scss = { "prettier" },
+        less = { "prettier" },
       },
       format_on_save = {
         lsp_fallback = false,

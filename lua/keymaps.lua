@@ -80,4 +80,22 @@ vim.keymap.set("n", "<leader>s/", function()
   })
 end, { desc = "[S]earch [/] in Open Files" })
 
-vim.keymap.set("n", "<leader>g", "<cmd>LazyGit<cr>", { desc = "Lazy[G]it" })
+-- Git
+vim.keymap.set("n", "<leader>g<leader>", "<cmd>LazyGit<cr>", { desc = "Lazy[G]it" })
+local gitsigns = require("gitsigns")
+vim.keymap.set("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[T]oggle Git [B]lame line" })
+vim.keymap.set("n", "<leader>gp", gitsigns.preview_hunk, { desc = "[G]it [P]review hunk" })
+vim.keymap.set("n", "<leader>gd", gitsigns.diffthis, { desc = "[G]it [D]iffs" })
+vim.keymap.set("n", "]c", function()
+  if vim.wo.diff then
+    return "]c"
+  end
+  gitsigns.nav_hunk("next")
+end, { expr = true, desc = "Next hunk" })
+
+vim.keymap.set("n", "[c", function()
+  if vim.wo.diff then
+    return "[c"
+  end
+  gitsigns.nav_hunk("prev")
+end, { expr = true, desc = "Prev hunk" })

@@ -6,6 +6,8 @@ return {
     },
     spec = {
       { "<leader>s", group = "[S]earch" },
+      { "<leader>t", group = "[T]oggle" },
+      { "<leader>g", group = "[G]it" },
       { "gb", group = "[B]uffer" },
     },
   },
