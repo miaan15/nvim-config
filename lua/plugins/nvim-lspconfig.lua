@@ -33,6 +33,9 @@ return {
     })
 
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
+    local clangd_capabilities = vim.tbl_deep_extend("force", capabilities, {
+      offsetEncoding = { "utf-16" },
+    })
 
     -- LSP
     -- lua_ls
@@ -56,6 +59,19 @@ return {
       },
     })
 
+    -- C++
+    lspconfig.clangd.setup({
+      capabilities = clangd_capabilities,
+      -- cmd = {
+      --   "clangd",
+      --   "--background-index",
+      --   "--clang-tidy",
+      --   "--completion-style=detailed",
+      --   "--header-insertion=never",
+      -- },
+      -- init_options = { clangdFileStatus = true },
+    })
+
     -- css
     lspconfig.cssls.setup({
       capabilities = capabilities,
@@ -75,6 +91,10 @@ return {
         css = { "prettier" },
         scss = { "prettier" },
         less = { "prettier" },
+        c = { "clang-format" },
+        cpp = { "clang-format" },
+        objc = { "clang-format" },
+        objcpp = { "clang-format" },
       },
       format_on_save = {
         lsp_fallback = false,
