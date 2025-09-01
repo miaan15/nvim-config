@@ -55,7 +55,6 @@ vim.keymap.set({ "n", "v" }, "<leader>f", function()
 end, { desc = "[F]ormat buffer" })
 
 -- Telescope
-local builtin = builtin
 vim.keymap.set("n", "<leader>s.h", builtin.help_tags, { desc = "[S]earch [H]elp" })
 vim.keymap.set("n", "<leader>s.k", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
 vim.keymap.set("n", "<leader>s.s", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
