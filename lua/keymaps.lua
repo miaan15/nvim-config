@@ -99,3 +99,10 @@ vim.keymap.set("n", "[c", function()
   end
   gitsigns.nav_hunk("prev")
 end, { expr = true, desc = "Prev hunk" })
+
+vim.api.nvim_set_keymap("n", "<leader>e", "", {
+  noremap = true,
+  callback = function()
+    require("ranger-nvim").open(true)
+  end,
+})

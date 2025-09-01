@@ -25,6 +25,10 @@ return {
           TelescopePromptBorder = { fg = colors.green, bg = "NONE" },
           TelescopeResultsBorder = { fg = colors.green, bg = "NONE" },
           TelescopePreviewBorder = { fg = colors.green, bg = "NONE" },
+
+          -- Keyword
+          ["@variable.parameter"] = { fg = colors.text },
+          ["@property"] = { fg = colors.maroon },
         }
       end,
     })
