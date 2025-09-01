@@ -30,6 +30,7 @@ vim.keymap.set("n", "gbb", "<C-^>", { desc = "Switch to last buffer" })
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
 -- LSP
+local builtin = require("telescope.builtin")
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(event)
     local map = function(keys, func, desc, mode)
@@ -38,13 +39,13 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end
     map("grn", vim.lsp.buf.rename, "[R]e[n]ame")
     map("gra", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "n", "x" })
-    map("grr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
-    map("gri", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
-    map("grd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
+    map("grr", builtin.lsp_references, "[G]oto [R]eferences")
+    map("gri", builtin.lsp_implementations, "[G]oto [I]mplementation")
+    map("grd", builtin.lsp_definitions, "[G]oto [D]efinition")
     map("grD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
-    map("gO", require("telescope.builtin").lsp_document_symbols, "Open Document Symbols")
-    map("gW", require("telescope.builtin").lsp_dynamic_workspace_symbols, "Open Workspace Symbols")
-    map("grt", require("telescope.builtin").lsp_type_definitions, "[G]oto [T]ype Definition")
+    map("gO", builtin.lsp_document_symbols, "Open Document Symbols")
+    map("gW", builtin.lsp_dynamic_workspace_symbols, "Open Workspace Symbols")
+    map("grt", builtin.lsp_type_definitions, "[G]oto [T]ype Definition")
   end,
 })
 
@@ -54,11 +55,14 @@ vim.keymap.set({ "n", "v" }, "<leader>f", function()
 end, { desc = "[F]ormat buffer" })
 
 -- Telescope
-local builtin = require("telescope.builtin")
+local builtin = builtin
 vim.keymap.set("n", "<leader>s.h", builtin.help_tags, { desc = "[S]earch [H]elp" })
 vim.keymap.set("n", "<leader>s.k", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
 vim.keymap.set("n", "<leader>s.s", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
 vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
+vim.keymap.set("n", "<leader>sF", function()
+  builtin.find_files({ hidden = true, no_ignore = true })
+end, { desc = "[S]earch [F]iles no hidden" })
 vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
 vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
