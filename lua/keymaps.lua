@@ -37,15 +37,17 @@ vim.api.nvim_create_autocmd("LspAttach", {
       mode = mode or "n"
       vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
     end
-    map("grn", vim.lsp.buf.rename, "[R]e[n]ame")
-    map("gra", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "n", "x" })
-    map("grr", builtin.lsp_references, "[G]oto [R]eferences")
-    map("gri", builtin.lsp_implementations, "[G]oto [I]mplementation")
-    map("grd", builtin.lsp_definitions, "[G]oto [D]efinition")
-    map("grD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
-    map("gO", builtin.lsp_document_symbols, "Open Document Symbols")
-    map("gW", builtin.lsp_dynamic_workspace_symbols, "Open Workspace Symbols")
-    map("grt", builtin.lsp_type_definitions, "[G]oto [T]ype Definition")
+    map("gn", vim.lsp.buf.rename, "[R]e[n]ame")
+    map("ga", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "n", "x" })
+    map("gr", builtin.lsp_references, "[G]oto [R]eferences")
+    map("gi", builtin.lsp_implementations, "[G]oto [I]mplementation")
+    map("gd", builtin.lsp_definitions, "[G]oto [D]efinition")
+    map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+    map("<leader>ss", builtin.lsp_document_symbols, "[S]earch Document [S]ymbols")
+    map("<leader>sS", builtin.lsp_dynamic_workspace_symbols, "[S]earch Workspace [S]ymbols")
+    map("gt", builtin.lsp_type_definitions, "[G]oto [T]ype Definition")
+    map("K", vim.lsp.buf.hover, "")
+    map("<C-k>", vim.lsp.buf.signature_help, "")
   end,
 })
 
@@ -84,7 +86,7 @@ vim.keymap.set("n", "<leader>s/", function()
 end, { desc = "[S]earch [/] in Open Files" })
 
 -- Git
-vim.keymap.set("n", "<leader>g<leader>", "<cmd>LazyGit<cr>", { desc = "Lazy[G]it" })
+vim.keymap.set("n", "<leader>gg", "<cmd>LazyGit<cr>", { desc = "Lazy[G]it" })
 local gitsigns = require("gitsigns")
 vim.keymap.set("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[T]oggle Git [B]lame line" })
 vim.keymap.set("n", "<leader>gp", gitsigns.preview_hunk, { desc = "[G]it [P]review hunk" })
@@ -108,4 +110,23 @@ vim.api.nvim_set_keymap("n", "<leader>e", "", {
   callback = function()
     require("ranger-nvim").open(true)
   end,
+})
+
+-- Autocomplete
+local cmp = require("cmp")
+cmp.setup({
+  mapping = {
+    ["<C-n>"] = cmp.mapping.select_next_item(),
+    ["<C-p>"] = cmp.mapping.select_prev_item(),
+    ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+    ["<C-f>"] = cmp.mapping.scroll_docs(4),
+    ["<C-Space>"] = cmp.mapping.complete(),
+    ["<C-e>"] = cmp.mapping.abort(),
+    ["<C-Y>"] = cmp.mapping.confirm({ select = false }),
+  },
+  sources = {
+    { name = "nvim_lsp" },
+    { name = "buffer" },
+    { name = "path" },
+  },
 })

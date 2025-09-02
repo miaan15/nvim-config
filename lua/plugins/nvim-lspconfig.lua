@@ -1,6 +1,10 @@
 return {
   "neovim/nvim-lspconfig",
   dependencies = {
+    -- Installer
+    "williamboman/mason.nvim",
+    "williamboman/mason-lspconfig.nvim",
+
     -- Format
     "stevearc/conform.nvim",
 
@@ -11,26 +15,21 @@ return {
     "hrsh7th/cmp-path",
   },
   config = function()
-    local lspconfig = require("lspconfig")
-
-    -- Setup nvim-cmp
-    local cmp = require("cmp")
-    cmp.setup({
-      mapping = {
-        ["<C-n>"] = cmp.mapping.select_next_item(),
-        ["<C-p>"] = cmp.mapping.select_prev_item(),
-        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-        ["<C-f>"] = cmp.mapping.scroll_docs(4),
-        ["<C-Space>"] = cmp.mapping.complete(),
-        ["<C-e>"] = cmp.mapping.abort(),
-        ["<C-Y>"] = cmp.mapping.confirm({ select = false }),
+    -- Mason setup
+    require("mason").setup({})
+    require("mason-lspconfig").setup({
+      ensure_installed = {
+        "lua_ls",
+        "jsonls",
+        "cssls",
+        "clangd",
+        "csharp_ls",
+        "omnisharp",
       },
-      sources = {
-        { name = "nvim_lsp" },
-        { name = "buffer" },
-        { name = "path" },
-      },
+      automatic_installation = true,
     })
+
+    local lspconfig = require("lspconfig")
 
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
     local clangd_capabilities = vim.tbl_deep_extend("force", capabilities, {
@@ -42,34 +41,14 @@ return {
     lspconfig.lua_ls.setup({
       capabilities = capabilities,
       settings = {
-        Lua = {
-          format = { enable = false },
-          diagnostics = { globals = { "vim" } },
-        },
+        Lua = { format = { enable = false }, diagnostics = { globals = { "vim" } } },
       },
     })
 
     -- json
     lspconfig.jsonls.setup({
       capabilities = capabilities,
-      settings = {
-        json = {
-          validate = { enable = true },
-        },
-      },
-    })
-
-    -- C++
-    lspconfig.clangd.setup({
-      capabilities = clangd_capabilities,
-      -- cmd = {
-      --   "clangd",
-      --   "--background-index",
-      --   "--clang-tidy",
-      --   "--completion-style=detailed",
-      --   "--header-insertion=never",
-      -- },
-      -- init_options = { clangdFileStatus = true },
+      settings = { json = { validate = { enable = true } } },
     })
 
     -- css
@@ -80,6 +59,22 @@ return {
         scss = { validate = true },
         less = { validate = true },
       },
+    })
+
+    -- C++
+    lspconfig.clangd.setup({
+      capabilities = clangd_capabilities,
+    })
+
+    -- C#
+    lspconfig.csharp_ls.setup({
+      capabilities = capabilities,
+      flags = { debounce_text_changes = 150 },
+    })
+    lspconfig.omnisharp.setup({
+      capabilities = capabilities,
+      cmd = { "omnisharp" },
+      flags = { debounce_text_changes = 150 },
     })
 
     -- Formatting
