@@ -2,8 +2,9 @@ return {
   "neovim/nvim-lspconfig",
   dependencies = {
     -- Installer
-    "williamboman/mason.nvim",
-    "williamboman/mason-lspconfig.nvim",
+    "mason-org/mason.nvim",
+    "mason-org/mason-lspconfig.nvim",
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
 
     -- Format
     "stevearc/conform.nvim",
@@ -15,85 +16,135 @@ return {
     "hrsh7th/cmp-path",
   },
   config = function()
-    -- Mason setup
-    require("mason").setup({})
-    require("mason-lspconfig").setup({
-      ensure_installed = {
-        "lua_ls",
-        "jsonls",
-        "cssls",
-        "clangd",
-        "csharp_ls",
-        "omnisharp",
-      },
-      automatic_installation = true,
-    })
-
     local lspconfig = require("lspconfig")
-
+    local util = require("lspconfig.util")
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
-    local clangd_capabilities = vim.tbl_deep_extend("force", capabilities, {
-      offsetEncoding = { "utf-16" },
-    })
 
-    -- LSP
-    -- lua_ls
-    lspconfig.lua_ls.setup({
-      capabilities = capabilities,
-      settings = {
-        Lua = { format = { enable = false }, diagnostics = { globals = { "vim" } } },
+    ---------------------------------------------------------------------
+    -- Servers/LSP
+    ---------------------------------------------------------------------
+    require("mason").setup({})
+
+    local servers = {
+      -- Lua
+      lua_ls = {
+        settings = {
+          Lua = { format = { enable = false }, diagnostics = { globals = { "vim" } } },
+        },
+      },
+
+      -- C#
+      omnisharp = {
+        cmd = { "omnisharp" },
+        flags = { debounce_text_changes = 150 },
+        root_dir = util.root_pattern("*.sln", "*.csproj", ".git"),
+      },
+
+      -- C/C++
+      clangd = {
+        capabilities = vim.tbl_deep_extend("force", capabilities, { offsetEncoding = { "utf-16" } }),
+        cmd = {
+          "clangd",
+          "--clang-tidy",
+          "--background-index",
+          "--header-insertion=never",
+        },
+      },
+
+      -- CMake
+      cmake = {
+        init_options = { buildDirectory = "build" },
+      },
+
+      -- JSON
+      jsonls = {
+        settings = { json = { validate = { enable = true } } },
+      },
+
+      -- CSS
+      cssls = {
+        settings = {
+          css = { validate = true },
+          scss = { validate = true },
+          less = { validate = true },
+        },
+      },
+
+      -- TOML
+      tombi = {},
+    }
+    local ensure_installed = vim.tbl_keys(servers or {})
+    vim.list_extend(ensure_installed, {
+      "stylua",
+      "clang-format",
+      "prettier",
+      "cmakelang",
+    })
+    require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
+    require("mason-lspconfig").setup({
+      ensure_installed = {},
+      automatic_installation = true,
+      handlers = {
+        function(server_name)
+          local server = servers[server_name] or {}
+          server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+          lspconfig[server_name].setup(server)
+        end,
       },
     })
 
-    -- json
-    lspconfig.jsonls.setup({
-      capabilities = capabilities,
-      settings = { json = { validate = { enable = true } } },
-    })
-
-    -- css
-    lspconfig.cssls.setup({
-      capabilities = capabilities,
-      settings = {
-        css = { validate = true },
-        scss = { validate = true },
-        less = { validate = true },
+    ---------------------------------------------------------------------
+    -- Diagnostic
+    ---------------------------------------------------------------------
+    vim.diagnostic.config({
+      severity_sort = true,
+      float = { border = "rounded", source = "if_many" },
+      underline = { severity = vim.diagnostic.severity.ERROR },
+      virtual_text = {
+        source = "if_many",
+        spacing = 2,
+        format = function(diagnostic)
+          local diagnostic_message = {
+            [vim.diagnostic.severity.ERROR] = diagnostic.message,
+            [vim.diagnostic.severity.WARN] = diagnostic.message,
+            [vim.diagnostic.severity.INFO] = diagnostic.message,
+            [vim.diagnostic.severity.HINT] = diagnostic.message,
+          }
+          return diagnostic_message[diagnostic.severity]
+        end,
       },
     })
 
-    -- C++
-    lspconfig.clangd.setup({
-      capabilities = clangd_capabilities,
-    })
-
-    -- C#
-    lspconfig.csharp_ls.setup({
-      capabilities = capabilities,
-      flags = { debounce_text_changes = 150 },
-    })
-    lspconfig.omnisharp.setup({
-      capabilities = capabilities,
-      cmd = { "omnisharp" },
-      flags = { debounce_text_changes = 150 },
-    })
-
-    -- Formatting
+    ---------------------------------------------------------------------
+    -- Format
+    ---------------------------------------------------------------------
     require("conform").setup({
       formatters_by_ft = {
+        -- Lua
         lua = { "stylua" },
+
+        -- Web
         json = { "prettier" },
         jsonc = { "prettier" },
         css = { "prettier" },
         scss = { "prettier" },
         less = { "prettier" },
+
+        -- C / C++
         c = { "clang-format" },
+        h = { "clang-format" },
         cpp = { "clang-format" },
+        hpp = { "clang-format" },
         objc = { "clang-format" },
         objcpp = { "clang-format" },
+
+        -- CMake
+        cmake = { "cmakelang" },
       },
+
       format_on_save = {
-        lsp_fallback = false,
         timeout_ms = 500,
+        lsp_format = "fallback",
       },
     })
   end,
