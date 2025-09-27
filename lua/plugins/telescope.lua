@@ -43,6 +43,15 @@ return {
           "%.mb$",
           "%.ma$",
 
+          -- Textures & materials
+          "%.exr$",
+          "%.hdr$",
+          "%.dds$",
+          "%.ktx$",
+          "%.astc$",
+          "%.crn$",
+          "%.pvr$",
+
           -- Unity-specific binary
           "%.asset$",
           "%.meta$",
@@ -52,6 +61,16 @@ return {
           "%.mat$",
           "%.cubemap$",
           "%.physicMaterial$",
+          -- Shader assets & caches
+          "%.shadergraph$",
+          "%.shadersubgraph$",
+          "%.shader$",
+          "%.cginc$",
+          "%.hlsl$",
+          "%.glsl$",
+          "%.compute$",
+          "%.renderTexture$",
+          "%.giparams$",
 
           -- Unity project-generated folders
           "^Library/",
