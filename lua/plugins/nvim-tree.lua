@@ -24,6 +24,9 @@ return {
       filters = {
         git_ignored = false,
         dotfiles = false,
+        custom = {
+          "*.meta",
+        },
       },
       git = {
         enable = true,
