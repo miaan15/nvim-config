@@ -55,3 +55,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     vim.hl.on_yank()
   end,
 })
+
+vim.o.autoread = true
+vim.cmd("autocmd FocusGained,BufEnter * :silent! checktime")

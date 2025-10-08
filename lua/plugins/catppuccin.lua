@@ -29,6 +29,10 @@ return {
           -- Keyword
           ["@variable.parameter"] = { fg = colors.text },
           ["@property"] = { fg = colors.maroon },
+          ["@module"] = { fg = colors.maroon },
+          ["Structure"] = { fg = colors.green },
+          ["Statement"] = { fg = colors.green },
+          ["String"] = { fg = colors.rosewater },
         }
       end,
     })
