@@ -25,61 +25,8 @@ return {
     ---------------------------------------------------------------------
     require("mason").setup({})
 
-    local servers = {
-      -- Lua
-      lua_ls = {
-        settings = {
-          Lua = { format = { enable = false }, diagnostics = { globals = { "vim" } } },
-        },
-      },
-
-      -- C#
-      omnisharp = {
-        cmd = { "omnisharp" },
-        flags = { debounce_text_changes = 150 },
-        root_dir = util.root_pattern("*.sln", "*.csproj", ".git"),
-      },
-
-      -- C/C++
-      clangd = {
-        capabilities = vim.tbl_deep_extend("force", capabilities, { offsetEncoding = { "utf-16" } }),
-        cmd = {
-          "clangd",
-          "--clang-tidy",
-          "--background-index",
-          "--header-insertion=never",
-        },
-      },
-
-      -- CMake
-      cmake = {
-        init_options = { buildDirectory = "build" },
-      },
-
-      -- JSON
-      jsonls = {
-        settings = { json = { validate = { enable = true } } },
-      },
-
-      -- CSS
-      cssls = {
-        settings = {
-          css = { validate = true },
-          scss = { validate = true },
-          less = { validate = true },
-        },
-      },
-
-      -- TOML
-      tombi = {},
-    }
+    local servers = {}
     local ensure_installed = vim.tbl_keys(servers or {})
-    vim.list_extend(ensure_installed, {
-      "stylua",
-      "clang-format",
-      "prettier",
-      "cmakelang",
-    })
     require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
     require("mason-lspconfig").setup({
       ensure_installed = {},
@@ -119,29 +66,6 @@ return {
     -- Format
     ---------------------------------------------------------------------
     require("conform").setup({
-      formatters_by_ft = {
-        -- Lua
-        lua = { "stylua" },
-
-        -- Web
-        json = { "prettier" },
-        jsonc = { "prettier" },
-        css = { "prettier" },
-        scss = { "prettier" },
-        less = { "prettier" },
-
-        -- C / C++
-        c = { "clang-format" },
-        h = { "clang-format" },
-        cpp = { "clang-format" },
-        hpp = { "clang-format" },
-        objc = { "clang-format" },
-        objcpp = { "clang-format" },
-
-        -- CMake
-        cmake = { "cmakelang" },
-      },
-
       format_on_save = {
         timeout_ms = 500,
         lsp_format = "fallback",

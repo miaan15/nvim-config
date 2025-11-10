@@ -27,8 +27,7 @@ return {
           TelescopePreviewBorder = { fg = colors.green, bg = "NONE" },
 
           -- Keyword
-          ["@variable.parameter"] = { fg = colors.text },
-          ["@property"] = { fg = colors.maroon },
+          ["@variable.parameter"] = { fg = colors.green },
           ["@module"] = { fg = colors.maroon },
           ["@lsp.type.concept.cpp"] = { fg = colors.yellow },
           ["Structure"] = { fg = colors.green },
