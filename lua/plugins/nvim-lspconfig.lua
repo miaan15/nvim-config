@@ -26,6 +26,7 @@ return {
     require("mason").setup({})
 
     local servers = {}
+
     local ensure_installed = vim.tbl_keys(servers or {})
     require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
     require("mason-lspconfig").setup({
@@ -39,6 +40,30 @@ return {
         end,
       },
     })
+
+    vim.lsp.config("clangd", {
+      install = {
+        cmd = { "/usr/sbin/clangd" },
+      },
+      filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+      setup = {
+        cmd = {
+          "/usr/sbin/clangd",
+          "--background-index",
+          "--clang-tidy",
+          "--header-insertion=iwyu",
+          "--completion-style=detailed",
+          "--function-arg-placeholders",
+          "--fallback-style=llvm",
+        },
+        root_dir = vim.fs.root(0, { "compile_commands.json", ".clangd", ".git" }),
+        capabilities = {
+          offsetEncoding = { "utf-16" },
+        },
+      },
+    })
+
+    vim.lsp.enable("clangd")
 
     ---------------------------------------------------------------------
     -- Diagnostic
