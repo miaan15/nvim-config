@@ -2,7 +2,12 @@ return {
   "mikavilpas/yazi.nvim",
   event = "VeryLazy",
   opts = {
-    floating_window_scaling_factor = 1.0,
-    open_for_directories = true,
+    open_for_directories = false,
+    open_multiple_files_in_tabs = false,
   },
+  config = function(_, opts)
+    require("yazi").setup(opts)
+
+    vim.keymap.set("n", "<leader>e", "<cmd>Yazi<cr>", { desc = "File [E]xplorer" })
+  end,
 }

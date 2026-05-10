@@ -8,12 +8,6 @@ return {
 
     -- Format
     "stevearc/conform.nvim",
-
-    -- Autocompletion
-    "hrsh7th/nvim-cmp",
-    "hrsh7th/cmp-nvim-lsp",
-    "hrsh7th/cmp-buffer",
-    "hrsh7th/cmp-path",
   },
   config = function()
     local lspconfig = require("lspconfig")
@@ -88,13 +82,37 @@ return {
     })
 
     ---------------------------------------------------------------------
-    -- Format
+    -- Keymaps
     ---------------------------------------------------------------------
-    -- require("conform").setup({
-    --   format_on_save = {
-    --     timeout_ms = 500,
-    --     lsp_format = "fallback",
-    --   },
-    -- })
+    local builtin = require("telescope.builtin")
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(event)
+    local map = function(keys, func, desc, mode)
+      mode = mode or "n"
+      vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
+    end
+    map("grn", vim.lsp.buf.rename, "[R]e[n]ame")
+    map("gra", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "n", "x" })
+    map("grd", builtin.lsp_definitions, "[G]oto [D]efinition")
+    map("grD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+    map("grr", builtin.lsp_references, "[G]oto [R]eferences")
+    map("gri", builtin.lsp_implementations, "[G]oto [I]mplementation")
+    map("grt", builtin.lsp_type_definitions, "[G]oto [T]ype Definition")
+    map("<leader>ss", builtin.lsp_document_symbols, "[S]earch Document [S]ymbols")
+    map("<leader>sS", builtin.lsp_dynamic_workspace_symbols, "[S]earch Workspace [S]ymbols")
+    map("K", vim.lsp.buf.hover, "")
+    map("<C-k>", vim.lsp.buf.signature_help, "")
+
+    if vim.lsp.inlay_hint then
+      map("<leader>th", function()
+        local enabled = false
+        if vim.lsp.inlay_hint.is_enabled then
+          enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
+        end
+        vim.lsp.inlay_hint.enable(not enabled, { bufnr = event.buf })
+      end, "[T]oggle Inlay [H]ints")
+    end
+  end,
+})
   end,
 }

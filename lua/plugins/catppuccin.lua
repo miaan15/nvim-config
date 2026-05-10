@@ -26,12 +26,17 @@ return {
           TelescopeResultsBorder = { fg = colors.green, bg = "NONE" },
           TelescopePreviewBorder = { fg = colors.green, bg = "NONE" },
 
-          -- Keyword
+          -- Keywords
           ["@variable.parameter"] = { fg = colors.green },
+          ["@function"] = { fg = colors.blue },
           ["@module"] = { fg = colors.maroon },
-          ["@lsp.type.concept.cpp"] = { fg = colors.yellow },
+
+          ["@property"] = { fg = colors.sky },
+          -- ["@lsp.type.variable"] = { fg = colors.sky },
+
           ["Structure"] = { fg = colors.green },
           ["Statement"] = { fg = colors.green },
+
           ["String"] = { fg = colors.rosewater },
         }
       end,
