@@ -11,3 +11,4 @@ return {
     vim.keymap.set("n", "<leader>e", "<cmd>Yazi<cr>", { desc = "File [E]xplorer" })
   end,
 }
+

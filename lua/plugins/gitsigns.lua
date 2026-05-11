@@ -8,15 +8,15 @@ return {
       delete = { text = "_" },
       topdelete = { text = "-" },
       changedelete = { text = "~" },
-      untracked = { text = '#' },
+      untracked = { text = "#" },
     },
     signs_staged = {
-      add = { text = '+' },
-      change = { text = '~' },
-      delete = { text = '_' },
-      topdelete = { text = '-' },
-      changedelete = { text = '~' },
-      untracked = { text = '#' },
+      add = { text = "+" },
+      change = { text = "~" },
+      delete = { text = "_" },
+      topdelete = { text = "-" },
+      changedelete = { text = "~" },
+      untracked = { text = "#" },
     },
     signcolumn = true,
     numhl = false,
@@ -36,12 +36,16 @@ return {
     vim.keymap.set("n", "<leader>gd", gitsigns.diffthis, { desc = "[G]it [D]iffs" })
 
     vim.keymap.set("n", "]c", function()
-      if vim.wo.diff then  return "]c" end
+      if vim.wo.diff then
+        return "]c"
+      end
       gitsigns.nav_hunk("next")
     end, { expr = true, desc = "Next hunk" })
 
     vim.keymap.set("n", "[c", function()
-      if vim.wo.diff then return "[c" end
+      if vim.wo.diff then
+        return "[c"
+      end
       gitsigns.nav_hunk("prev")
     end, { expr = true, desc = "Prev hunk" })
   end,

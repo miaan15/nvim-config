@@ -32,7 +32,6 @@ return {
           ["@module"] = { fg = colors.maroon },
 
           ["@property"] = { fg = colors.sky },
-          -- ["@lsp.type.variable"] = { fg = colors.sky },
 
           ["Structure"] = { fg = colors.green },
           ["Statement"] = { fg = colors.green },

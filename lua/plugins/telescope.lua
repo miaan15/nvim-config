@@ -14,7 +14,9 @@ return {
       path_display = { "truncate" },
       mappings = {
         i = {
-          ["<leader>q"] = function(...) require("telescope.actions").close(...) end,
+          ["<leader>q"] = function(...)
+            require("telescope.actions").close(...)
+          end,
         },
       },
     },
@@ -39,12 +41,12 @@ return {
     vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
     vim.keymap.set("n", "<leader>so", builtin.oldfiles, { desc = "[S]earch [O]ld Files" })
 
-    vim.keymap.set("n", "<leader>sb", function()
+    vim.keymap.set("n", "<leader>s<leader>", function()
       builtin.buffers({
         sort_mru = true,
         ignore_current_buffer = true,
       })
-    end, { desc = "[S]earch open [B]uffers" })
+    end, { desc = "[S]earch open buffers []" })
 
     vim.keymap.set("n", "<leader>s/", function()
       builtin.current_buffer_fuzzy_find()

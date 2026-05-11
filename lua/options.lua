@@ -47,7 +47,7 @@ vim.o.inccommand = "split"
 vim.o.cursorline = true
 
 --
-vim.o.scrolloff = 7
+vim.o.scrolloff = 4
 
 -- Need to confirm save changes
 vim.o.confirm = true
@@ -72,10 +72,10 @@ vim.o.autoread = true
 vim.cmd("autocmd FocusGained,BufEnter * :silent! checktime")
 
 -- Keymaps
-vim.keymap.set("n", "<C-d>", "<cmd>nohlsearch<cr>", { desc = "Clear search highlights" })
+vim.keymap.set("t", "<C-d>", "<cmd>nohlsearch<cr>", { desc = "Close terminal" })
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<cr>", { desc = "Clear search highlights" })
 vim.keymap.set("t", "<C-d>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
-vim.keymap.set("t", "<leader>q", "<C-\\><C-n><cmd>bd!<CR>", { desc = "Close terminal" })
-vim.keymap.set("n", "<leader>q", "<cmd>bd<CR>", { desc = "Close" })
+vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n><cmd>bd<CR>", { desc = "Close terminal" })
 
 -- Buffer
 vim.keymap.set("n", "gbn", ":bnext<CR>", { desc = "Next buffer" })
@@ -89,8 +89,8 @@ vim.keymap.set({ "n", "v" }, "<leader>f", function()
 end, { desc = "[F]ormat buffer" })
 
 -- Move
-vim.keymap.set('n', '<M-Down>', ':m .+1<CR>==', { desc = 'Move line down' })
-vim.keymap.set('n', '<M-Up>', ':m .-2<CR>==', { desc = 'Move line up' })
+vim.keymap.set("n", "<M-Down>", ":m .+1<CR>==", { desc = "Move line down" })
+vim.keymap.set("n", "<M-Up>", ":m .-2<CR>==", { desc = "Move line up" })
 
-vim.keymap.set('v', '<M-Down>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
-vim.keymap.set('v', '<M-Up>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
+vim.keymap.set("v", "<M-Down>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+vim.keymap.set("v", "<M-Up>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
