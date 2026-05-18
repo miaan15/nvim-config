@@ -13,4 +13,3 @@ local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
 require("lazy").setup("plugins")
-
