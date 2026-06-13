@@ -41,6 +41,8 @@ vim.opt.path:append("**")
 vim.opt.wildignore:append({ "*/.git/*", "*/node_modules/*", "*/vendor/*", "*/build/*" })
 vim.opt.wildmode = "longest:full,full"
 
+require("diagnostics")
+
 vim.api.nvim_create_autocmd("TextYankPost", {
     desc = "Highlight when yanking (copying) text",
     group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
@@ -98,6 +100,7 @@ vim.keymap.set("v", "<M-Right>", ">gv", { desc = "Shift right" })
 vim.keymap.set('n', "<leader>x", "<cmd>bdelete<CR>", { desc = "Delete buffer" })
 vim.keymap.set("n", "<leader>n", "<cmd>bnext<CR>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>m", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
+vim.keymap.set('n', '<leader>b', ':ls<CR>:b<Space>', { desc = 'List and select buffer' })
 
 vim.keymap.set('n', '<S-Up>', '{', { desc = "Jump to previous empty line" })
 vim.keymap.set('n', '<S-Down>', '}', { desc = "Jump to next empty line" })
@@ -108,6 +111,8 @@ vim.keymap.set("n", "<leader>F", ":find ", { desc = "Find find fuzzy" })
 vim.keymap.set("n", "<leader>t", "<cmd>ToggleTerminal<CR>", { desc = "Toggle Terminal" })
 
 vim.keymap.set("n", "<leader>/", "<cmd>SplitSmart<CR>", { desc = "Split window smart" })
+
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Show line diagnostics" })
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -175,17 +180,6 @@ require("lazy").setup({
                 pattern = langs,
                 callback = function(args)
                     vim.treesitter.start()
-
-                    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-
-                    local parser = vim.treesitter.get_parser(args.buf)
-                    if parser then
-                        parser:register_cbs({
-                            on_changedtree = function()
-                                vim.diagnostic.show()
-                            end
-                        })
-                    end
                 end,
             })
         end,
