@@ -163,7 +163,10 @@ require("lazy").setup({
                 highlight = {
                     enable = true,
                 },
-                install_dir = vim.fn.stdpath('data') .. '/site'
+                indent = {
+                    enable = true,
+                },
+                install_dir = vim.fn.stdpath('data') .. '/site',
             })
 
             require('nvim-treesitter').install(langs)
