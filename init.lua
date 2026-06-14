@@ -84,6 +84,62 @@ vim.api.nvim_create_user_command("SplitSmart", function()
     else vim.cmd("split") end
 end, {})
 
+vim.api.nvim_create_user_command("LastBuffer", function()
+    local alt_buf = vim.fn.bufnr('#')
+    if alt_buf ~= -1 and vim.fn.buflisted(alt_buf) == 1 then
+        vim.cmd('buffer #')
+    else
+        pcall(vim.cmd, 'bprevious')
+    end
+end, {})
+
+vim.api.nvim_create_user_command("BufferMenu", function()
+    local buffers = {}
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].buflisted then
+            table.insert(buffers, bufnr)
+        end
+    end
+
+    if #buffers == 0 then
+        print("No buffers open")
+        return
+    end
+
+    local lines = {}
+    local buf_map = {}
+  
+    for i, bufnr in ipairs(buffers) do
+        local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t")
+        if name == "" then name = "[]" end
+        table.insert(lines, string.format("%d\t %s", i, name))
+        buf_map[tostring(i)] = bufnr
+    end
+
+    local height = #lines + 1
+    vim.cmd("botright " .. height .. "new")
+    local win = vim.api.nvim_get_current_win()
+    local buf = vim.api.nvim_get_current_buf()
+
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+    vim.bo[buf].modifiable = false
+    vim.bo[buf].buftype = "nofile"
+    vim.bo[buf].filetype = "buffer_menu"
+    vim.wo[win].number = false
+    vim.wo[win].relativenumber = false
+    vim.wo[win].cursorline = true
+
+    for key, target_buf in pairs(buf_map) do
+        vim.keymap.set('n', key, function()
+            vim.cmd("bd!")
+            vim.api.nvim_set_current_buf(target_buf)
+        end, { buffer = buf, nowait = true })
+    end
+
+    -- Map <Esc> or 'q' to just close the menu
+    vim.keymap.set('n', '<Esc>', '<cmd>bd!<CR>', { buffer = buf })
+end, {})
+
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
@@ -97,10 +153,11 @@ vim.keymap.set("n", "<M-Right>", ">>", { desc = "Shift right" })
 vim.keymap.set("v", "<M-Left>", "<gv", { desc = "Shift left" })
 vim.keymap.set("v", "<M-Right>", ">gv", { desc = "Shift right" })
 
+vim.keymap.set('n', '<leader>b', '<cmd>BufferMenu<CR>', { desc = 'List and select buffer' })
 vim.keymap.set('n', "<leader>x", "<cmd>bdelete<CR>", { desc = "Delete buffer" })
 vim.keymap.set("n", "<leader>n", "<cmd>bnext<CR>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>m", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
-vim.keymap.set('n', '<leader>b', ':ls<CR>:b<Space>', { desc = 'List and select buffer' })
+vim.keymap.set("n", "<leader>,", "<cmd>LastBuffer<CR>", { desc = "Previous buffer" })
 
 vim.keymap.set('n', '<S-Up>', '{', { desc = "Jump to previous empty line" })
 vim.keymap.set('n', '<S-Down>', '}', { desc = "Jump to next empty line" })
