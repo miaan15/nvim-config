@@ -43,6 +43,14 @@ vim.opt.wildmode = "longest:full,full"
 
 require("diagnostics")
 
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "c", "cpp" },
+    group = vim.api.nvim_create_augroup("cpp-colorcolumn", { clear = true }),
+    callback = function()
+        vim.opt_local.colorcolumn = "81"
+    end,
+})
+
 vim.api.nvim_create_autocmd("TextYankPost", {
     desc = "Highlight when yanking (copying) text",
     group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
@@ -80,7 +88,7 @@ vim.api.nvim_create_user_command("SplitSmart", function()
     local windows = vim.api.nvim_tabpage_list_wins(0)
     local current_window_count = #windows
 
-    if current_window_count % 2 ~= 0 then vim.cmd("vsplit") 
+    if current_window_count % 2 ~= 0 then vim.cmd("vsplit")
     else vim.cmd("split") end
 end, {})
 
@@ -108,7 +116,7 @@ vim.api.nvim_create_user_command("BufferMenu", function()
 
     local lines = {}
     local buf_map = {}
-  
+
     for i, bufnr in ipairs(buffers) do
         local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t")
         if name == "" then name = "[]" end
@@ -136,7 +144,6 @@ vim.api.nvim_create_user_command("BufferMenu", function()
         end, { buffer = buf, nowait = true })
     end
 
-    -- Map <Esc> or 'q' to just close the menu
     vim.keymap.set('n', '<Esc>', '<cmd>bd!<CR>', { buffer = buf })
 end, {})
 
@@ -241,6 +248,30 @@ require("lazy").setup({
             })
         end,
     },
+    { -- LSP
+        "neovim/nvim-lspconfig",
+        config = function()
+            vim.lsp.config("clangd", {
+                cmd = {
+                    "clangd",
+                    "--background-index",
+                    "--clang-tidy",
+                    "--header-insertion=iwyu",
+                },
+            })
+            vim.lsp.enable("clangd")
+            vim.api.nvim_create_autocmd('LspAttach', {
+                group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),
+                callback = function(ev)
+                    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = "Go to Definition", buffer = ev.buf })
+                    vim.keymap.set('n', 'gr', vim.lsp.buf.references, { desc = "Go to References", buffer = ev.buf })
+                    vim.keymap.set('n', 'K', vim.lsp.buf.hover, { desc = "Hover Documentation", buffer = ev.buf })
+                    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, { desc = "Rename Symbol", buffer = ev.buf })
+                    vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, { desc = "Code Action", buffer = ev.buf })
+                end,
+            })
+        end,
+    },
     { -- Indent Line
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",
@@ -270,5 +301,39 @@ require("lazy").setup({
             })
             vim.keymap.set("n", "<leader>e", "<cmd>Oil<CR>", { desc = "Open parent directory" })
         end
+    },
+    { -- Virtual column
+        "lukas-reineke/virt-column.nvim",
+        opts = {
+            char = "▏",
+        },
+    },
+    { -- Git Sign
+        "lewis6991/gitsigns.nvim",
+        event = { "BufReadPre", "BufNewFile" },
+        opts = {
+            signs = {
+                add = { text = "+" },
+                change = { text = "~" },
+                delete = { text = "_" },
+                topdelete = { text = "-" },
+                changedelete = { text = "~" },
+                untracked = { text = "#" },
+            },
+            signs_staged = {
+                add = { text = "+" },
+                change = { text = "~" },
+                delete = { text = "_" },
+                topdelete = { text = "-" },
+                changedelete = { text = "~" },
+                untracked = { text = "#" },
+            },
+            signcolumn = true,
+            numhl = false,
+            linehl = false,
+            word_diff = false,
+            current_line_blame = false,
+            current_line_blame_opts = { delay = 100 },
+        },
     },
 })
