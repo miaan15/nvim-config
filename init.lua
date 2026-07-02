@@ -102,26 +102,33 @@ vim.api.nvim_create_user_command("LastBuffer", function()
 end, {})
 
 vim.api.nvim_create_user_command("BufferMenu", function()
-    local buffers = {}
-    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-        if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].buflisted then
-            table.insert(buffers, bufnr)
+    local bufinfo = vim.fn.getbufinfo({ buflisted = 1 })
+    local valid_bufs = {}
+
+    for i, info in ipairs(bufinfo) do
+        if info.loaded == 1 and info.bufnr ~= current_buf then
+            table.insert(valid_bufs, info)
         end
     end
 
-    if #buffers == 0 then
+    if #valid_bufs == 0 then
         print("No buffers open")
         return
     end
 
-    local lines = {}
-    local buf_map = {}
+    table.sort(valid_bufs, function(a, b)
+        return a.lastused > b.lastused
+    end)
 
-    for i, bufnr in ipairs(buffers) do
-        local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t")
-        if name == "" then name = "[]" end
-        table.insert(lines, string.format("%d\t %s", i, name))
-        buf_map[tostring(i)] = bufnr
+    local lines = {}
+    local ordered_bufnrs = {}
+
+    for _, info in ipairs(valid_bufs) do
+        local name = vim.fn.fnamemodify(info.name, ":t")
+        if name == "" then name = "[No Name]" end
+
+        table.insert(lines, name)
+        table.insert(ordered_bufnrs, info.bufnr)
     end
 
     local height = #lines + 1
@@ -133,18 +140,21 @@ vim.api.nvim_create_user_command("BufferMenu", function()
     vim.bo[buf].modifiable = false
     vim.bo[buf].buftype = "nofile"
     vim.bo[buf].filetype = "buffer_menu"
+
     vim.wo[win].number = false
     vim.wo[win].relativenumber = false
     vim.wo[win].cursorline = true
 
-    for key, target_buf in pairs(buf_map) do
-        vim.keymap.set('n', key, function()
-            vim.cmd("bd!")
-            vim.api.nvim_set_current_buf(target_buf)
-        end, { buffer = buf, nowait = true })
-    end
+    vim.keymap.set('n', '<CR>', function()
+        local row = vim.api.nvim_win_get_cursor(0)[1]
+        local target_buf = ordered_bufnrs[row]
 
-    vim.keymap.set('n', '<Esc>', '<cmd>bd!<CR>', { buffer = buf })
+        vim.cmd("bd!")
+
+        if target_buf and vim.api.nvim_buf_is_valid(target_buf) then
+            vim.api.nvim_set_current_buf(target_buf)
+        end
+    end, { buffer = buf, nowait = true })
 end, {})
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -218,36 +228,11 @@ require("lazy").setup({
             vim.cmd.colorscheme("catppuccin")
         end,
     },
+
     { -- which-key
         "folke/which-key.nvim",
     },
-    { -- Treesitter
-        "nvim-treesitter/nvim-treesitter",
-        lazy = false,
-        build = ":TSUpdate",
-        config = function()
-            local langs = { "c", "cpp", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" }
 
-            require("nvim-treesitter").setup({
-                highlight = {
-                    enable = true,
-                },
-                indent = {
-                    enable = true,
-                },
-                install_dir = vim.fn.stdpath('data') .. '/site',
-            })
-
-            require('nvim-treesitter').install(langs)
-
-            vim.api.nvim_create_autocmd('FileType', {
-                pattern = langs,
-                callback = function(args)
-                    vim.treesitter.start()
-                end,
-            })
-        end,
-    },
     { -- LSP
         "neovim/nvim-lspconfig",
         config = function()
@@ -263,15 +248,14 @@ require("lazy").setup({
             vim.api.nvim_create_autocmd('LspAttach', {
                 group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),
                 callback = function(ev)
-                    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = "Go to Definition", buffer = ev.buf })
-                    vim.keymap.set('n', 'gr', vim.lsp.buf.references, { desc = "Go to References", buffer = ev.buf })
+                    vim.keymap.set('n', 'grd', vim.lsp.buf.definition, { desc = "Go to Definition", buffer = ev.buf })
                     vim.keymap.set('n', 'K', vim.lsp.buf.hover, { desc = "Hover Documentation", buffer = ev.buf })
-                    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, { desc = "Rename Symbol", buffer = ev.buf })
                     vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, { desc = "Code Action", buffer = ev.buf })
                 end,
             })
         end,
     },
+
     { -- Indent Line
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",
@@ -288,6 +272,7 @@ require("lazy").setup({
             })
         end,
     },
+
     { -- Explore
         'stevearc/oil.nvim',
         config = function()
@@ -302,12 +287,14 @@ require("lazy").setup({
             vim.keymap.set("n", "<leader>e", "<cmd>Oil<CR>", { desc = "Open parent directory" })
         end
     },
+
     { -- Virtual column
         "lukas-reineke/virt-column.nvim",
         opts = {
             char = "▏",
         },
     },
+
     { -- Git Sign
         "lewis6991/gitsigns.nvim",
         event = { "BufReadPre", "BufNewFile" },
