@@ -106,19 +106,23 @@ vim.api.nvim_create_user_command("BufferMenu", function()
     local valid_bufs = {}
 
     for i, info in ipairs(bufinfo) do
-        if info.loaded == 1 and info.bufnr ~= current_buf then
+        if info.loaded == 1 then
             table.insert(valid_bufs, info)
         end
+    end
+
+    table.sort(valid_bufs, function(a, b)
+        return a.lastused > b.lastused
+    end)
+
+    if #valid_bufs > 0 then
+        table.remove(valid_bufs, 1)
     end
 
     if #valid_bufs == 0 then
         print("No buffers open")
         return
     end
-
-    table.sort(valid_bufs, function(a, b)
-        return a.lastused > b.lastused
-    end)
 
     local lines = {}
     local ordered_bufnrs = {}
