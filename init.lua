@@ -4,7 +4,7 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 vim.g.have_nerd_font = true
-vim.opt.termguicolors = false
+vim.opt.termguicolors = true
 vim.o.number = true
 vim.o.mouse = 'a'
 vim.o.showmode = false
@@ -40,6 +40,17 @@ vim.cmd("autocmd FocusGained,BufEnter * :silent! checktime")
 vim.opt.path:append("**")
 vim.opt.wildignore:append({ "*/.git/*", "*/node_modules/*", "*/vendor/*", "*/build/*" })
 vim.opt.wildmode = "longest:full,full"
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+    pattern = "*",
+    callback = function()
+        vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+        vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+        vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
+        vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
+        vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "none" })
+    end,
+})
 
 require("diagnostics")
 
@@ -180,8 +191,8 @@ vim.keymap.set("n", "<leader>n", "<cmd>bnext<CR>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>m", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
 vim.keymap.set("n", "<leader>,", "<cmd>LastBuffer<CR>", { desc = "Previous buffer" })
 
-vim.keymap.set('n', '<S-Up>', '{', { desc = "Jump to previous empty line" })
-vim.keymap.set('n', '<S-Down>', '}', { desc = "Jump to next empty line" })
+vim.keymap.set({ 'n', 'v' }, '<S-Up>', '{', { desc = "Jump to previous empty line" })
+vim.keymap.set({ 'n', 'v' }, '<S-Down>', '}', { desc = "Jump to next empty line" })
 
 vim.keymap.set("n", "<leader>f", ":e <C-R>=expand('%:p:h') . '/'<CR>", { desc = "Find find" })
 vim.keymap.set("n", "<leader>F", ":find ", { desc = "Find find fuzzy" })
