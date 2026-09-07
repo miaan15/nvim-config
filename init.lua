@@ -66,7 +66,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     callback = function() vim.hl.on_yank() end,
 })
 
-vim.api.nvim_create_user_command('WhitespaceTrim', function()
+vim.api.nvim_create_user_command('TrimWhitespaces', function()
     local save_cursor = vim.api.nvim_win_get_cursor(0)
     local last_search = vim.fn.getreg('/')
     vim.cmd([[%s/\s\+$//e]])
