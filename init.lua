@@ -211,6 +211,7 @@ vim.keymap.set("n", "<leader>t", "<cmd>ToggleTerminal<CR>", { desc = "Toggle Ter
 vim.keymap.set("n", "<leader>/", "<cmd>SplitSmart<CR>", { desc = "Split window smart" })
 
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Show line diagnostics" })
+vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = "Line Diagnostics" })
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -286,7 +287,29 @@ require("lazy").setup({
                         local filter = { bufnr = ev.buf }
                         vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled(filter), filter)
                     end, { desc = "Toggle Inlay Hints", buffer = ev.buf })
-                    vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = "Line Diagnostics", buffer = ev.buf })
+                end,
+            })
+        end,
+    },
+
+    { -- Treesitter
+        "nvim-treesitter/nvim-treesitter",
+        lazy = false,
+        build = ":TSUpdate",
+        config = function()
+            local ts = require("nvim-treesitter")
+
+            ts.install({ "c", "cpp", "odin", "lua", "markdown", "markdown_inline" })
+
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = { "c", "cpp", "odin", "lua", "markdown" },
+                callback = function(args)
+                    if vim.bo[args.buf].buftype == "nofile" then
+                        return
+                    end
+
+                    pcall(vim.treesitter.start, args.buf)
+                    vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
                 end,
             })
         end,
