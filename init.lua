@@ -170,6 +170,17 @@ vim.api.nvim_create_user_command("BufferMenu", function()
     end, { buffer = buf, nowait = true })
 end, {})
 
+vim.api.nvim_create_autocmd("BufWritePre", {
+    group = vim.api.nvim_create_augroup("trim-whitespaces-on-save", { clear = true }),
+    pattern = "*",
+    callback = function()
+        if vim.bo.buftype ~= "" or not vim.bo.modifiable then
+            return
+        end
+        vim.cmd("TrimWhitespaces")
+    end,
+})
+
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
@@ -189,8 +200,8 @@ vim.keymap.set("n", "<leader>n", "<cmd>bnext<CR>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>m", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
 vim.keymap.set("n", "<leader>,", "<cmd>LastBuffer<CR>", { desc = "Previous buffer" })
 
-vim.keymap.set({ 'n', 'v' }, '<S-Up>', '{', { desc = "Jump to previous empty line" })
-vim.keymap.set({ 'n', 'v' }, '<S-Down>', '}', { desc = "Jump to next empty line" })
+vim.keymap.set('n', '<S-Up>', '{', { desc = "Jump to previous empty line" })
+vim.keymap.set('n', '<S-Down>', '}', { desc = "Jump to next empty line" })
 
 vim.keymap.set("n", "<leader>f", ":e <C-R>=expand('%:p:h') . '/'<CR>", { desc = "Find find" })
 vim.keymap.set("n", "<leader>F", ":find ", { desc = "Find find fuzzy" })
@@ -249,6 +260,7 @@ require("lazy").setup({
     { -- LSP
         "neovim/nvim-lspconfig",
         config = function()
+            -- c
             vim.lsp.config("clangd", {
                 cmd = {
                     "clangd",
@@ -258,12 +270,23 @@ require("lazy").setup({
                 },
             })
             vim.lsp.enable("clangd")
+
+            -- odin
+            vim.lsp.config("ols", {
+                cmd = { "ols" },
+            })
+            vim.lsp.enable("ols")
+
             vim.api.nvim_create_autocmd('LspAttach', {
                 group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),
                 callback = function(ev)
                     vim.keymap.set('n', 'grd', vim.lsp.buf.definition, { desc = "Go to Definition", buffer = ev.buf })
                     vim.keymap.set('n', 'K', vim.lsp.buf.hover, { desc = "Hover Documentation", buffer = ev.buf })
-                    vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, { desc = "Code Action", buffer = ev.buf })
+                    vim.keymap.set('n', 'grh', function()
+                        local filter = { bufnr = ev.buf }
+                        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled(filter), filter)
+                    end, { desc = "Toggle Inlay Hints", buffer = ev.buf })
+                    vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = "Line Diagnostics", buffer = ev.buf })
                 end,
             })
         end,
