@@ -186,8 +186,6 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 
 vim.keymap.set("n", "<M-Down>", "<cmd>m .+1<CR>==", { desc = "Move line down" })
 vim.keymap.set("n", "<M-Up>", "<cmd>m .-2<CR>==", { desc = "Move line up" })
-vim.keymap.set("v", "<M-Down>", "<cmd>m '>+1<CR>gv=gv", { desc = "Move selection down" })
-vim.keymap.set("v", "<M-Up>", "<cmd>m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
 vim.keymap.set("n", "<M-Left>", "<<", { desc = "Shift left" })
 vim.keymap.set("n", "<M-Right>", ">>", { desc = "Shift right" })
@@ -196,12 +194,10 @@ vim.keymap.set("v", "<M-Right>", ">gv", { desc = "Shift right" })
 
 vim.keymap.set('n', '<leader>b', '<cmd>BufferMenu<CR>', { desc = 'List and select buffer' })
 vim.keymap.set('n', "<leader>x", "<cmd>bdelete<CR>", { desc = "Delete buffer" })
-vim.keymap.set("n", "<leader>n", "<cmd>bnext<CR>", { desc = "Next buffer" })
-vim.keymap.set("n", "<leader>m", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
 vim.keymap.set("n", "<leader>,", "<cmd>LastBuffer<CR>", { desc = "Previous buffer" })
 
-vim.keymap.set('n', '<S-Up>', '{', { desc = "Jump to previous empty line" })
-vim.keymap.set('n', '<S-Down>', '}', { desc = "Jump to next empty line" })
+vim.keymap.set({ 'n', 'v' }, '<S-Up>', '{', { desc = "Jump to previous empty line" })
+vim.keymap.set({ 'n', 'v' }, '<S-Down>', '}', { desc = "Jump to next empty line" })
 
 vim.keymap.set("n", "<leader>f", ":e <C-R>=expand('%:p:h') . '/'<CR>", { desc = "Find find" })
 vim.keymap.set("n", "<leader>F", ":find ", { desc = "Find find fuzzy" })
@@ -299,10 +295,10 @@ require("lazy").setup({
         config = function()
             local ts = require("nvim-treesitter")
 
-            ts.install({ "c", "cpp", "odin", "lua", "markdown", "markdown_inline" })
+            ts.install({ "c", "cpp", "c_sharp", "odin", "lua", "markdown", "markdown_inline" })
 
             vim.api.nvim_create_autocmd("FileType", {
-                pattern = { "c", "cpp", "odin", "lua", "markdown" },
+                pattern = { "c", "cpp", "cs", "odin", "lua", "markdown" },
                 callback = function(args)
                     if vim.bo[args.buf].buftype == "nofile" then
                         return
@@ -342,16 +338,15 @@ require("lazy").setup({
                     { "size", align = "right" },
                     { "mtime", format = "%Y-%m-%d [%H:%M]" },
                 },
+                view_options = {
+                    show_hidden = false,
+                    is_hidden_file = function(name, bufnr)
+                        return vim.endswith(name, ".meta")
+                    end,
+                },
             })
             vim.keymap.set("n", "<leader>e", "<cmd>Oil<CR>", { desc = "Open parent directory" })
         end
-    },
-
-    { -- Virtual column
-        "lukas-reineke/virt-column.nvim",
-        opts = {
-            char = "▏",
-        },
     },
 
     { -- Git Sign
