@@ -28,6 +28,17 @@ vim.g.netrw_liststyle = 1
 vim.opt.path:append("**")
 vim.opt.wildmenu = true
 
+if vim.fn.has("win32") == 1 then
+    local powershell = vim.fn.executable("pwsh") == 1 and "pwsh" or "powershell"
+
+    vim.o.shell = powershell
+    vim.o.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;"
+    vim.o.shellredir = "-RedirectStandardOutput %s -NoNewWindow"
+    vim.o.shellpipe = "2>&1 | Out-File -Encoding UTF8 %s"
+    vim.o.shellquote = ""
+    vim.o.shellxquote = ""
+end
+
 vim.schedule(function() vim.o.clipboard = "unnamedplus" end)
 vim.cmd("set expandtab")
 vim.cmd("set tabstop=4")
@@ -54,9 +65,8 @@ require("diagnostics")
 
 vim.api.nvim_create_autocmd("FileType", {
     pattern = { "c", "cpp" },
-    group = vim.api.nvim_create_augroup("cpp-colorcolumn", { clear = true }),
     callback = function()
-        vim.opt_local.colorcolumn = "81"
+        vim.opt_local.formatoptions:remove({ "r", "o" })
     end,
 })
 
@@ -64,6 +74,28 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     desc = "Highlight when yanking (copying) text",
     group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
     callback = function() vim.hl.on_yank() end,
+})
+
+local lsp_term_group = vim.api.nvim_create_augroup("LspTerminalToggle", { clear = true })
+
+vim.api.nvim_create_autocmd("BufEnter", {
+    group = lsp_term_group,
+    callback = function(args)
+        local buftype = vim.bo[args.buf].buftype
+
+        if buftype == "terminal" then
+            for _, client in ipairs(vim.lsp.get_clients()) do
+                client:stop()
+            end
+        else
+            local ft = vim.bo[args.buf].filetype
+            if ft == "c" or ft == "cpp" then
+                vim.lsp.enable("clangd")
+            elseif ft == "odin" then
+                vim.lsp.enable("ols")
+            end
+        end
+    end,
 })
 
 vim.api.nvim_create_user_command('TrimWhitespaces', function()
@@ -233,16 +265,31 @@ require("lazy").setup({
                 flavour = "auto",
                 custom_highlights = function(colors)
                     return {
-                        ["@variable.parameter"] = { fg = colors.green },
-                        ["@function"] = { fg = colors.blue },
-                        ["@module"] = { fg = colors.maroon },
+                        ["@function"] = { fg = colors.sky },
+                        ["@function.builtin"] = { fg = colors.sky },
+                        ["Operator"] = { fg = colors.sky },
 
-                        ["@property"] = { fg = colors.sky },
+                        ["@module"] = { fg = colors.blue },
+
+                        ["@variable.parameter"] = { fg = colors.text },
+                        ["@property"] = { fg = colors.text },
+                        ["@lsp.type.enumMember"] = { fg = colors.text },
+                        ["Macro"] = { fg = colors.text },
+                        ["Include"] = { fg = colors.subtext0 },
 
                         ["Structure"] = { fg = colors.green },
                         ["Statement"] = { fg = colors.green },
 
                         ["String"] = { fg = colors.rosewater },
+
+                        ["Comment"] = { fg = colors.pink },
+
+                        ["Type"] = { fg = colors.sapphire },
+                        ["StorageClass"] = { fg = colors.sapphire },
+
+                        ["Constant"] = { fg = colors.rosewater },
+                        ["Boolean"] = { fg = colors.rosewater },
+                        ["Number"] = { fg = colors.rosewater },
                     }
                 end,
             })
@@ -288,29 +335,29 @@ require("lazy").setup({
         end,
     },
 
-    { -- Treesitter
-        "nvim-treesitter/nvim-treesitter",
-        lazy = false,
-        build = ":TSUpdate",
-        config = function()
-            local ts = require("nvim-treesitter")
-
-            ts.install({ "c", "cpp", "c_sharp", "odin", "lua", "markdown", "markdown_inline" })
-
-            vim.api.nvim_create_autocmd("FileType", {
-                pattern = { "c", "cpp", "cs", "odin", "lua", "markdown" },
-                callback = function(args)
-                    if vim.bo[args.buf].buftype == "nofile" then
-                        return
-                    end
-
-                    pcall(vim.treesitter.start, args.buf)
-                    vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-                end,
-            })
-        end,
-    },
-
+    -- { -- Treesitter
+    --     "nvim-treesitter/nvim-treesitter",
+    --     lazy = false,
+    --     build = ":TSUpdate",
+    --     config = function()
+    --         local ts = require("nvim-treesitter")
+    --
+    --         ts.install({ "c", "cpp", "c_sharp", "odin", "lua", "markdown", "markdown_inline" })
+    --
+    --         vim.api.nvim_create_autocmd("FileType", {
+    --             pattern = { "c", "cpp", "cs", "odin", "lua", "markdown" },
+    --             callback = function(args)
+    --                 if vim.bo[args.buf].buftype == "nofile" then
+    --                     return
+    --                 end
+    --
+    --                 pcall(vim.treesitter.start, args.buf)
+    --                 vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    --             end,
+    --         })
+    --     end,
+    -- },
+    --
     { -- Indent Line
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",
