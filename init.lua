@@ -306,6 +306,7 @@ require("lazy").setup({
         config = function()
             -- c
             vim.lsp.config("clangd", {
+                filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
                 cmd = {
                     "clangd",
                     "--background-index",
@@ -314,12 +315,6 @@ require("lazy").setup({
                 },
             })
             vim.lsp.enable("clangd")
-
-            -- odin
-            vim.lsp.config("ols", {
-                cmd = { "ols" },
-            })
-            vim.lsp.enable("ols")
 
             vim.api.nvim_create_autocmd('LspAttach', {
                 group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),
@@ -335,42 +330,25 @@ require("lazy").setup({
         end,
     },
 
-    -- { -- Treesitter
-    --     "nvim-treesitter/nvim-treesitter",
-    --     lazy = false,
-    --     build = ":TSUpdate",
-    --     config = function()
-    --         local ts = require("nvim-treesitter")
-    --
-    --         ts.install({ "c", "cpp", "c_sharp", "odin", "lua", "markdown", "markdown_inline" })
-    --
-    --         vim.api.nvim_create_autocmd("FileType", {
-    --             pattern = { "c", "cpp", "cs", "odin", "lua", "markdown" },
-    --             callback = function(args)
-    --                 if vim.bo[args.buf].buftype == "nofile" then
-    --                     return
-    --                 end
-    --
-    --                 pcall(vim.treesitter.start, args.buf)
-    --                 vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-    --             end,
-    --         })
-    --     end,
-    -- },
-    --
-    { -- Indent Line
-        "lukas-reineke/indent-blankline.nvim",
-        main = "ibl",
-        event = "BufReadPre",
+    { -- Treesitter
+        "nvim-treesitter/nvim-treesitter",
+        lazy = false,
+        build = ":TSUpdate",
         config = function()
-            require("ibl").setup({
-                indent = {
-                    char = "▏",
-                },
-                scope = {
-                    show_start = false,
-                    show_end = false,
-                },
+            local ts = require("nvim-treesitter")
+
+            ts.install({ "c", "cpp", "c_sharp", "odin", "lua", "markdown", "markdown_inline", "glsl" })
+
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = { "c", "cpp", "cs", "odin", "lua", "markdown", "glsl" },
+                callback = function(args)
+                    if vim.bo[args.buf].buftype == "nofile" then
+                        return
+                    end
+
+                    pcall(vim.treesitter.start, args.buf)
+                    vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                end,
             })
         end,
     },
